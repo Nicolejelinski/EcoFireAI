@@ -56,7 +56,7 @@ public class MainApp {
         System.out.println("\nMonitoring sensors...");
         System.out.println(center.monitorSensors(sensors));
 
-        // 2. Calculate fire risk
+        // 2. fire risk
         FirePrediction prediction = riskCalculator.calculateComprehensiveRisk(
                 tempSensor, humiditySensor, windSensor);
 
@@ -64,16 +64,16 @@ public class MainApp {
                 prediction.getRiskLevel(), prediction.getConfidence());
 
         // 3. Dispatch drones if risk is high
-        if (prediction.getRiskLevel() > 0.35) {
+        if (prediction.getRiskLevel() > 0.39) {
             System.out.println("\nRisk level elevated. Dispatching drones...");
             System.out.println(droneCoordinator.dispatchSurveyMission(drones, "High Risk Zone", false));
 
-            // Simulate thermal drone finding hotspots
+            // thermal drone finding hotspots
             String alertMsg = "Thermal anomalies detected in northern sector";
             alertSystem.sendAlert(AlertLevels.HIGH, alertMsg);
         }
 
-        // 4. Generate final report
+        // 4. final report
         List<FirePrediction> predictions = new ArrayList<>();
         predictions.add(prediction);
 
