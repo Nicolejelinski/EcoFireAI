@@ -13,7 +13,7 @@ public class MainApp {
         Scanner scanner = new Scanner(System.in);
 
         // inicializando motiramento de area x
-        MonitoringCenter center = new MonitoringCenter("MC-001", "Floresta");
+        MonitoringCenter center = new MonitoringCenter("MC-001", "Local x");
         AlertSystem alertSystem = new AlertSystem("ALERT-001");
         FireRiskCalculator riskCalculator = new FireRiskCalculator();
         DroneCoordinator droneCoordinator = new DroneCoordinator();
@@ -64,7 +64,7 @@ public class MainApp {
                 prediction.getRiskLevel(), prediction.getConfidence());
 
         // 3. Dispatch drones if risk is high
-        if (prediction.getRiskLevel() > 0.3) {
+        if (prediction.getRiskLevel() > 0.35) {
             System.out.println("\nRisk level elevated. Dispatching drones...");
             System.out.println(droneCoordinator.dispatchSurveyMission(drones, "High Risk Zone", false));
 
