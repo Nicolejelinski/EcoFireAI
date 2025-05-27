@@ -26,7 +26,7 @@ public class ThermalDrone extends Drone {
         return String.format("Thermal hotspots detected with sensitivity %.2f", sensitivity);
     }
 
-    // Overloaded method with default sensitivity
+    // overloaded method with default sensitivity
     public String detectHotspots() {
         return detectHotspots(0.5); // Default sensitivity
     }

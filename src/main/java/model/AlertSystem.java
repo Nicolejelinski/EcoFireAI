@@ -34,7 +34,7 @@ public class AlertSystem {
     }
 
     /**
-     * Escalates an alert to higher severity
+     * escalates an alert to higher severity
      * @param newSeverity the escalated severity level
      */
     public void escalateAlert(AlertLevels newSeverity) {
