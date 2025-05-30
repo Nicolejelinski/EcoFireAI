@@ -3,7 +3,7 @@ package src.main.java.model;
 import java.time.Instant;
 
 /**
- * Handles alert generation and notification
+ * handles alert generation and notification
  */
 public class AlertSystem {
     private final String alertId;
@@ -16,7 +16,7 @@ public class AlertSystem {
     }
 
     /**
-     * Sends an alert to relevant parties
+     * ssends an alert to relevant parties
      * @param severity level of alert severity
      * @param message alert content
      * @return confirmation message

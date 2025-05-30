@@ -1,7 +1,7 @@
 package src.main.java.model;
 
 /**
- * Base class for all drone types in the system
+ * base class for all drone types in the system
  */
 public class Drone {
     protected final String droneId;
@@ -17,7 +17,7 @@ public class Drone {
     }
 
     /**
-     * Initiates drone takeoff sequence
+     * initiates drone takeoff sequence
      */
     public void takeOff() {
         if (batteryLevel < 20) {
@@ -28,7 +28,7 @@ public class Drone {
     }
 
     /**
-     * Lands the drone at current position
+     * lands the drone at current position
      */
     public void land() {
         status = DroneStatus.LANDED;
@@ -36,7 +36,7 @@ public class Drone {
     }
 
     /**
-     * Simulates area scanning
+     * simulates area scanning
      * @return simulated image data
      */
     public String scanArea() {
@@ -48,7 +48,7 @@ public class Drone {
     }
 
     /**
-     * Returns drone to its base location
+     * returns drone to its base location
      */
     public void returnToBase() {
         System.out.println("Drone " + droneId + " returning to base");

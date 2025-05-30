@@ -4,21 +4,26 @@ import src.main.java.model.service.DroneCoordinator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.*;
 
 /**
- * Main application for EcoFireAI system
+ * main application for EcoFireAI system
  */
 public class MainApp {
+    private static final Logger logger = Logger.getLogger(MainApp.class.getName());
+
     public static void main(String[] args) {
+        setupLogger();
+
         Scanner scanner = new Scanner(System.in);
 
-        // inicializando motiramento de area x
-        MonitoringCenter center = new MonitoringCenter("MC-001", "Local x");
+        // initializing monitoring center
+        MonitoringCenter center = new MonitoringCenter("MC-001", "Zone X");
         AlertSystem alertSystem = new AlertSystem("ALERT-001");
         FireRiskCalculator riskCalculator = new FireRiskCalculator();
         DroneCoordinator droneCoordinator = new DroneCoordinator();
 
-        // criando sensores
+        logger.info("Initializing sensors...");
         List<Sensor> sensors = new ArrayList<>();
         System.out.println("=== Sensor Setup ===");
         System.out.print("Enter temperature sensor location: ");
@@ -33,14 +38,12 @@ public class MainApp {
         sensors.add(tempSensor);
         sensors.add(humiditySensor);
         sensors.add(windSensor);
-
-        // Activate sensors
         sensors.forEach(Sensor::activate);
 
-        // Create drones
+        logger.info("Initializing drones...");
         List<Drone> drones = new ArrayList<>();
         System.out.println("\n=== Drone Setup ===");
-        System.out.print("Enter regular drone deployment location: ");
+        System.out.print("Enter standard drone deployment location: ");
         Drone regularDrone = new Drone("DRONE-001", scanner.nextLine());
 
         System.out.print("Enter thermal drone deployment location: ");
@@ -49,37 +52,72 @@ public class MainApp {
         drones.add(regularDrone);
         drones.add(thermalDrone);
 
-        // System demonstration
-        System.out.println("\n=== System Demonstration ===");
-
-        // 1. Monitor sensors
-        System.out.println("\nMonitoring sensors...");
+        System.out.println("\n=== Launching Continuous Monitoring ===");
         System.out.println(center.monitorSensors(sensors));
 
-        // 2. fire risk
-        FirePrediction prediction = riskCalculator.calculateComprehensiveRisk(
-                tempSensor, humiditySensor, windSensor);
-
-        System.out.printf("\nCurrent fire risk: %.2f (Confidence: %.2f)%n",
-                prediction.getRiskLevel(), prediction.getConfidence());
-
-        // 3. Dispatch drones if risk is high
-        if (prediction.getRiskLevel() > 0.39) {
-            System.out.println("\nRisk level elevated. Dispatching drones...");
-            System.out.println(droneCoordinator.dispatchSurveyMission(drones, "High Risk Zone", false));
-
-            // thermal drone finding hotspots
-            String alertMsg = "Thermal anomalies detected in northern sector";
-            alertSystem.sendAlert(AlertLevels.HIGH, alertMsg);
-        }
-
-        // 4. final report
         List<FirePrediction> predictions = new ArrayList<>();
-        predictions.add(prediction);
+        FirePrediction prediction;
+        boolean dronesDispatched = false;
 
-        System.out.println("\n=== Final System Report ===");
-        System.out.println(center.generateReport(sensors, drones, predictions));
+        while (true) {
+            logger.info("Reading sensors...");
+            double temp = tempSensor.readData();
+            double hum = humiditySensor.readData();
+            double wind = windSensor.readData();
 
-        scanner.close();
+            prediction = riskCalculator.calculateComprehensiveRisk(tempSensor, humiditySensor, windSensor);
+            double risk = prediction.getRiskLevel();
+            double confidence = prediction.getConfidence();
+
+            System.out.printf("Temperature: %.2f°C | Humidity: %.2f%% | Wind Speed: %.2f km/h%n", temp, hum, wind);
+            System.out.printf("Fire Risk Level: %.2f (Confidence: %.2f)%n", risk, confidence);
+            logger.info(String.format("Sensor readings - Temp: %.2f°C, Humidity: %.2f%%, Wind: %.2f km/h", temp, hum, wind));
+            logger.info(String.format("Fire Risk: %.2f | Confidence: %.2f", risk, confidence));
+
+            predictions.add(prediction);
+
+            if (risk > 0.49) {
+                if (!dronesDispatched) {
+                    logger.warning("Elevated fire risk detected. Deploying drones...");
+                    System.out.println("Elevated fire risk detected. Deploying drones...");
+                    System.out.println(droneCoordinator.dispatchSurveyMission(drones, "High Risk Zone", false));
+                    alertSystem.sendAlert(AlertLevels.HIGH, "Thermal anomalies detected in the northern sector.");
+                    dronesDispatched = true;
+                } else {
+                    logger.info("Fire risk remains elevated.");
+                    System.out.println("Fire risk remains elevated...");
+                }
+            } else {
+                if (dronesDispatched) {
+                    logger.info("Fire risk controlled. Drones returning to base.");
+                    System.out.println("Fire risk controlled. Drones are returning to base.");
+                    dronesDispatched = false;
+                } else {
+                    logger.info("Conditions stable. Continuing monitoring...");
+                    System.out.println("Conditions stable. Continuing monitoring...");
+                }
+            }
+
+            try {
+                Thread.sleep(2500);
+            } catch (InterruptedException e) {
+                logger.severe("Monitoring interrupted. Shutting down.");
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+    }
+
+    private static void setupLogger() {
+        try {
+            LogManager.getLogManager().reset();
+            Logger rootLogger = Logger.getLogger("");
+            FileHandler fileHandler = new FileHandler("EcoFireAI.log", true);
+            fileHandler.setFormatter(new SimpleFormatter());
+            rootLogger.addHandler(fileHandler);
+            rootLogger.setLevel(Level.INFO);
+        } catch (Exception e) {
+            System.err.println("Could not set up logger: " + e.getMessage());
+        }
     }
 }
